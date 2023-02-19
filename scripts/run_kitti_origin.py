@@ -33,10 +33,7 @@ Command Line Arguments: Defaults, # Comments
 
 import sys
 import os
-import glob
-import re
 import argparse
-import pandas as pd
 from multiprocessing import freeze_support
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -88,24 +85,3 @@ if __name__ == '__main__':
     if len(metrics_list) == 0:
         raise Exception('No metrics selected for evaluation')
     evaluator.evaluate(dataset_list, metrics_list)
-
-
-    # make summary csv
-    dst = dataset_config['OUTPUT_FOLDER']
-    allcat = glob.glob(f'{dst}/label_02/*.txt')
-
-    allcat_ls = []
-    for cat in allcat:
-        cat_name = re.findall('[a-z_&]+_summary', cat)[0]
-        cat_name = re.sub('_summary', '', cat_name)
-        cat_df = pd.read_csv(cat, sep=' ')
-        cat_df.index = [cat_name]
-
-        allcat_ls.append(cat_df)
-
-    allcat_df = pd.concat(allcat_ls, axis=0)
-    allcat_df = allcat_df.iloc[1:, :][['HOTA', 'MOTA', 
-                                        'DetA', 'AssA', 'DetRe', 'DetPr', 'LocA', 'OWTA',
-                                        'MOTP', 'MODA',
-                                        'sMOTA', 'IDF1', 'IDR', 'IDP', 'IDTP', 'IDFN', 'IDFP', 'Dets', 'GT_Dets', 'IDs', 'GT_IDs']]
-    allcat_df.to_csv(f'{dst}/allcat_summary.csv')
